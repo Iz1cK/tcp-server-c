@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
-const int TIME_PORT = 12345;
+const int PROXY_PORT = 12345;
 
 bool checkForAnError(int bytesResult, char* ErrorAt, SOCKET socket){
     if (SOCKET_ERROR == bytesResult) {
@@ -21,11 +21,11 @@ bool checkForAnError(int bytesResult, char* ErrorAt, SOCKET socket){
     return false;
 }
 
-void main() {
+int main() {
 	WSADATA wsaData;
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 0), & wsaData)) {
 		printf("Time Client: Error at WSAStartup()\n");
-		return;
+		return 1;
 	}
 
 	SOCKET connSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -33,21 +33,21 @@ void main() {
 		printf("Time Client: Error at socket(): ");
 		printf("%d", WSAGetLastError());
 		WSACleanup();
-		return;
+		return 1;
 	}
 
 	struct sockaddr_in server;
 	memset( & server, 0, sizeof(server));
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = inet_addr("127.0.0.1");
-	server.sin_port = htons(TIME_PORT);
+	server.sin_port = htons(PROXY_PORT);
 
 	if (SOCKET_ERROR == connect(connSocket, (SOCKADDR * ) & server, sizeof(server))) {
 		printf("Time Client: Error at connect(): ");
 		printf("%d", WSAGetLastError());
 		closesocket(connSocket);
 		WSACleanup();
-		return;
+		return 1;
 	}
 	printf("connection established successfully.");
 
@@ -73,25 +73,25 @@ void main() {
                 sendBuff = "listfolder ";
                 break;
             case '2':
-                printf("Please enter a file name:\n");
+                printf("Please enter a file name:");
                 char filename[100];
                 scanf("%s",&filename);
                 char request[100] = "getfile ";
-                printf("%s", request);
                 strcat(request,filename);
                 sendBuff = request;
                 break;
             case '3':
                 printf("Calculating RTT:\n");
                 double start = GetTickCount();
-                sendBuff = "calcrtt ";
+                //sendBuff = "calcrtt ";
+                sendBuff = "getfile script.php";
                 bytesSent = send(connSocket, sendBuff, (int) strlen(sendBuff), 0);
                 if (checkForAnError(bytesSent,"send",connSocket))
-                    return;
+                    return 1;
 
                 bytesRecv = recv(connSocket, recvBuff, 255, 0);
                 if (checkForAnError(bytesRecv,"recv",connSocket))
-                    return;
+                    return 1;
                 double end = GetTickCount();
                 three = true;
                 printf("TTR: %f", end-start);
@@ -104,20 +104,21 @@ void main() {
                 fflush(stdin);
                 continue;
         }
-        if(three) continue;
-        bytesSent = send(connSocket, sendBuff, (int) strlen(sendBuff), 0);
-        if (checkForAnError(bytesSent,"send",connSocket))
-            return;
-		if(option == '4'){
-                printf("Closing connection.");
-                break;
-		}
+        if(!three){
+            bytesSent = send(connSocket, sendBuff, (int) strlen(sendBuff), 0);
+            if (checkForAnError(bytesSent,"send",connSocket))
+                return 1;
+            if(option == '4'){
+                    printf("Closing connection.");
+                    break;
+            }
 
-		bytesRecv = recv(connSocket, recvBuff, 255, 0);
-        if (checkForAnError(bytesRecv,"recv",connSocket))
-			return;
+            bytesRecv = recv(connSocket, recvBuff, sizeof recvBuff, 0);
+            if (checkForAnError(bytesRecv,"recv",connSocket))
+                return 1;
 
-		printf("\nRecieved from server: %s \n",recvBuff);
+            printf("Recieved from server:\n%s\n",recvBuff);
+        }
 		fflush(stdin);
 		sendBuff="";
         memset(recvBuff, 0, 255);
