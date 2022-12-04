@@ -155,7 +155,7 @@ int main()
             char* file = "";
             char fullRequest[255] = "";
 
-            bytesRecv = recv(msgSocket, recvBuff, 255, 0);
+            bytesRecv = recv(msgSocket, recvBuff, 100, 0);
             if (checkForAnError(bytesRecv,"recv",listenSocket,msgSocket))
                 return 1;
             strcpy(fullRequest,recvBuff);
@@ -231,7 +231,7 @@ int main()
                     mainBytesRecv = recv(mainConnSocket, recvMainBuff, sizeof recvMainBuff, 0);
                     if (checkForAnErrorMain(mainBytesRecv,"recv",mainConnSocket))
                         return 1;
-                    //closesocket(mainConnSocket);
+
                     printf("Recieved from main server:\n%s\n",recvMainBuff);
                     if(strncmp(recvMainBuff,"fileNotFound",12) == 0){
                         sendBuff="Requested file was not found";

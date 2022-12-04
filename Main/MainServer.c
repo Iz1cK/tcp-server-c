@@ -168,14 +168,14 @@ int main() {
                 closesocket(msgSocket);
                 break;
             }
-
             printf("Sending: %s\n",sendBuff);
             bytesSent = send(msgSocket, sendBuff, (int) strlen(sendBuff), 0);
             if (checkForAnError(bytesRecv,"send",listenSocket,msgSocket))
                 return 1;
-
             fflush(stdin);
             sendBuff="";
+            closesocket(msgSocket);
+            break;
         }
     }
     closesocket(listenSocket);
