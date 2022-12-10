@@ -53,17 +53,11 @@ char *readFile(char *filename)
     long length = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buffer = (char *) calloc(1,length + 1);
-//    char *buffer = (char *) malloc(length + 1);
     buffer[length] = '\0';
-//    memset(buffer,0,sizeof buffer);
     fread(buffer, 1, length, f);
-//    printf("buffer: %s",buffer);
     fclose(f);
     return buffer;
 }
-
-#include <stdio.h>
-#include <stdbool.h>
 
 // return true if the file specified by the filename exists
 bool fileExists(const char *filename)
@@ -195,7 +189,6 @@ int main()
                     content="";
                 } else {
                     printf("File %s not found, forwarding request to main server.\n", file);
-
                     SOCKET mainConnSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
                     if (INVALID_SOCKET == mainConnSocket) {
                         printf("Proxy Client: Error at socket(): ");
@@ -236,22 +229,22 @@ int main()
                     if(strncmp(recvMainBuff,"fileNotFound",12) == 0){
                         sendBuff="Requested file was not found";
                     } else {
-                        FILE *f = fopen(pathToFile, "w");
-                        if(f==NULL){
-                            printf("FOPEN: Error has occured");
-                            return 1;
-                        }
-                        fprintf(f,"%s", recvMainBuff);
-                        fclose(f);
-                        sendBuff = recvMainBuff;
+//                        FILE *f = fopen(pathToFile, "w");
+//                        if(f==NULL){
+//                            printf("FOPEN: Error has occured");
+//                            return 1;
+//                        }
+//                        fprintf(f,"%s", recvMainBuff);
+//                        fclose(f);
+//                        sendBuff = recvMainBuff;
                     }
 
                 }
                 file="";
                 free(pathToFile);
-            }
-            else
-            {
+            } else if(strncmp(request, "closeMain", 9) == 0){
+                sendBuff="closeMain";
+            } else {
                 printf("Proxy Server: Closing Connection.\n");
                 closesocket(msgSocket);
                 break;

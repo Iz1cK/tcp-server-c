@@ -82,19 +82,29 @@ int main() {
                 break;
             case '3':
                 printf("Calculating RTT:\n");
-                double start = GetTickCount();
-                //sendBuff = "calcrtt ";
-                sendBuff = "getfile script.php";
-                bytesSent = send(connSocket, sendBuff, (int) strlen(sendBuff), 0);
+                double sum = 0;
+                for(int i=0;i<100;i++){
+                    double start = GetTickCount();
+                    sendBuff = "getfile script.php";
+                    bytesSent = send(connSocket, sendBuff, (int) strlen(sendBuff), 0);
+                    if (checkForAnError(bytesSent,"send",connSocket))
+                        return 1;
+
+                    bytesRecv = recv(connSocket, recvBuff, 255, 0);
+                    if (checkForAnError(bytesRecv,"recv",connSocket))
+                        return 1;
+                    double end = GetTickCount();
+                    sum += (end-start);
+                }
+                bytesSent = send(connSocket, "closeMain", (int) strlen(sendBuff), 0);
                 if (checkForAnError(bytesSent,"send",connSocket))
                     return 1;
 
                 bytesRecv = recv(connSocket, recvBuff, 255, 0);
                 if (checkForAnError(bytesRecv,"recv",connSocket))
                     return 1;
-                double end = GetTickCount();
                 three = true;
-                printf("TTR: %f", end-start);
+                printf("RTT: %f", sum/100);
                 break;
             case '4':
                 sendBuff = "kill ";

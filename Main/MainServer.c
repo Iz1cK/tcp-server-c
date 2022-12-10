@@ -48,11 +48,8 @@ char *readFile(char *filename)
     long length = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buffer = (char *) calloc(1,length + 1);
-//    char *buffer = (char *) malloc(length + 1);
     buffer[length] = '\0';
-//    memset(buffer,0,sizeof buffer);
     fread(buffer, 1, length, f);
-//    printf("buffer: %s",buffer);
     fclose(f);
     return buffer;
 }
@@ -114,7 +111,6 @@ int main() {
 
 	while(1)
     {
-
         struct sockaddr_in from; // Address of sending partner
         int fromLen = sizeof(from);
 
@@ -138,8 +134,8 @@ int main() {
             char fullRequest[255] = "";
             char* request = "";
             char* file = "";
-
             bytesRecv = recv(msgSocket, recvBuff, 255, 0);
+            printf("%d",bytesRecv);
             if (checkForAnError(bytesRecv,"recv",listenSocket,msgSocket))
                 return 1;
             printf("Recieved Request From Proxy\n");
